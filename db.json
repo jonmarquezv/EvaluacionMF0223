@@ -1,11 +1,11 @@
 {
   "servidores": [
     {
-      "nombre": "DBMaster",
-      "cpu": 8,
-      "ram": 6,
+      "nombre": "LatinServer",
+      "cpu": 6,
+      "ram": 16,
       "almacenamiento": "SSD",
-      "id": "PAKyo5xrUSE"
+      "id": "18h6bGlYEw4"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
