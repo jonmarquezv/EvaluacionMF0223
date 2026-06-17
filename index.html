@@ -270,13 +270,11 @@
         });
 
         async function deleteServer(id) {
-            if (confirm('¿Estás seguro de eliminar esta configuración de servidor?')) {
-                try {
-                    await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-                    fetchServers();
-                } catch (error) {
-                    alert('Error al intentar eliminar el servidor.');
-                }
+            try {
+                await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                fetchServers();
+            } catch (error) {
+                alert('Error al intentar eliminar el servidor.');
             }
         }
 
