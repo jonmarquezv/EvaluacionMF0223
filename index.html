@@ -6,7 +6,6 @@
     <title>TechSpecs Manager</title>
     
     <style>
-        /* Reseteo básico para consistencia en navegadores */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -19,7 +18,6 @@
             color: #333;
         }
 
-        /* --- Cabecera --- */
         .header {
             background-color: #2c3e50;
             color: #ffffff;
@@ -28,10 +26,8 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* --- Layout Principal con CSS Grid --- */
         .container {
             display: grid;
-            /* En móviles (por defecto), es una sola columna */
             grid-template-columns: 1fr;
             gap: 2rem;
             padding: 2rem;
@@ -39,15 +35,13 @@
             margin: 0 auto;
         }
 
-        /* En pantallas más grandes (tablets/escritorio), se divide en dos columnas */
         @media (min-width: 768px) {
             .container {
-                grid-template-columns: 350px 1fr; /* Formulario fijo de 350px, el resto para tarjetas */
-                align-items: start; /* Evita que el formulario se estire verticalmente si hay muchas tarjetas */
+                grid-template-columns: 350px 1fr;
+                align-items: start;
             }
         }
 
-        /* --- Estilos de Secciones y Paneles --- */
         .form-section, .cards-section {
             background-color: #ffffff;
             padding: 1.5rem;
@@ -63,7 +57,6 @@
             padding-bottom: 0.5rem;
         }
 
-        /* --- Formulario --- */
         .form-group {
             margin-bottom: 1.25rem;
         }
@@ -107,10 +100,8 @@
             background-color: #2980b9;
         }
 
-        /* --- Visualización de Tarjetas (Cards) --- */
         .cards-grid {
             display: grid;
-            /* Sub-grid auto-adaptable: crea tantas columnas como quepan con un mínimo de 250px */
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 1rem;
         }
@@ -120,8 +111,11 @@
             padding: 1.25rem;
             border-radius: 6px;
             border: 1px solid #e0e0e0;
-            border-left: 5px solid #2ecc71; /* Acento visual para identificar la tarjeta */
+            border-left: 5px solid #2ecc71;
             transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .card:hover {
@@ -140,9 +134,26 @@
             font-size: 0.95rem;
             color: #555;
         }
+
+        .btn-delete {
+            margin-top: 1rem;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .btn-delete:hover {
+            background-color: #c0392b;
+        }
     </style>
 </head>
 <body>
+
     <header class="header">
         <h1>TechSpecs Manager</h1>
     </header>
@@ -183,89 +194,93 @@
         <section class="cards-section">
             <h2>Servidores Registrados</h2>
             <div class="cards-grid" id="cardsContainer">
-                
-                <article class="card">
-                    <h3>DB-Prod-01</h3>
-                    <div class="card-details">
-                        <p><strong>CPU:</strong> 8 Núcleos</p>
-                        <p><strong>RAM:</strong> 32 GB</p>
-                        <p><strong>Disco:</strong> SSD</p>
-                    </div>
-                </article>
-                
-            </div>
+                </div>
         </section>
 
     </main>
 
-<script>
-    const API_URL = 'http://localhost:3000/servidores';
-    const form = document.getElementById('serverForm');
-    const container = document.getElementById('cardsContainer');
+    <script>
+        const API_URL = 'http://localhost:3000/servidores';
+        const form = document.getElementById('serverForm');
+        const container = document.getElementById('cardsContainer');
 
-    // 1. LECTURA (GET) - Cargar al iniciar
-    async function fetchServers() {
-        const res = await fetch(API_URL);
-        const data = await res.json();
-        renderCards(data);
-    }
-
-    // Renderizar tarjetas en el DOM
-    function renderCards(servers) {
-        container.innerHTML = '';
-        servers.forEach(s => {
-            container.innerHTML += `
-                <article class="card">
-                    <h3>${s.nombre}</h3>
-                    <div class="card-details">
-                        <p><strong>CPU:</strong> ${s.cpu} Núcleos</p>
-                        <p><strong>RAM:</strong> ${s.ram} GB</p>
-                        <p><strong>Disco:</strong> ${s.almacenamiento}</p>
-                    </div>
-                    <button onclick="deleteServer('${s.id}')" style="margin-top:10px; color:red; cursor:pointer;">Eliminar</button>
-                </article>`;
-        });
-    }
-
-    // 2. ESCRITURA (POST) - Validar presupuesto (Simulado: 1 nucleo = 50€, 1GB RAM = 20€)
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const cpu = parseInt(document.getElementById('cpu').value);
-        const ram = parseInt(document.getElementById('ram').value);
-        
-        const costo = (cpu * 50) + (ram * 20);
-        
-        if (costo > 700) {
-            alert('Error: El presupuesto supera los 700€ (Cálculo: ' + costo + '€)');
-            return;
+        async function fetchServers() {
+            try {
+                const res = await fetch(API_URL);
+                if (!res.ok) throw new Error('Error al conectar con el servidor');
+                const data = await res.json();
+                renderCards(data);
+            } catch (error) {
+                container.innerHTML = `<p style="color: red;">Asegúrate de ejecutar json-server en tu terminal: npx json-server --watch db.json --port 3000</p>`;
+            }
         }
 
-        const newServer = {
-            nombre: document.getElementById('serverName').value,
-            cpu,
-            ram,
-            almacenamiento: document.getElementById('storage').value
-        };
+        function renderCards(servers) {
+            container.innerHTML = '';
+            if(servers.length === 0) {
+                container.innerHTML = '<p style="color: #7f8c8d;">No hay servidores registrados actualmente.</p>';
+                return;
+            }
+            servers.forEach(s => {
+                container.innerHTML += `
+                    <article class="card">
+                        <div>
+                            <h3>${s.nombre}</h3>
+                            <div class="card-details">
+                                <p><strong>CPU:</strong> ${s.cpu} Núcleos</p>
+                                <p><strong>RAM:</strong> ${s.ram} GB</p>
+                                <p><strong>Disco:</strong> ${s.almacenamiento}</p>
+                            </div>
+                        </div>
+                        <button class="btn-delete" onclick="deleteServer('${s.id}')">Eliminar</button>
+                    </article>`;
+            });
+        }
 
-        await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newServer)
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const cpu = parseInt(document.getElementById('cpu').value);
+            const ram = parseInt(document.getElementById('ram').value);
+            
+            const costo = (cpu * 50) + (ram * 20);
+            
+            if (costo > 700) {
+                alert(`Error: El presupuesto supera los 700€.\nCosto estimado de esta configuración: ${costo}€`);
+                return;
+            }
+
+            const newServer = {
+                nombre: document.getElementById('serverName').value,
+                cpu,
+                ram,
+                almacenamiento: document.getElementById('storage').value
+            };
+
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newServer)
+                });
+                form.reset();
+                fetchServers();
+            } catch (error) {
+                alert('No se pudo guardar la configuración. ¿Está activo el json-server?');
+            }
         });
-        
-        form.reset();
+
+        async function deleteServer(id) {
+            if (confirm('¿Estás seguro de eliminar esta configuración de servidor?')) {
+                try {
+                    await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                    fetchServers();
+                } catch (error) {
+                    alert('Error al intentar eliminar el servidor.');
+                }
+            }
+        }
+
         fetchServers();
-    });
-
-    // 3. BORRADO (DELETE)
-    async function deleteServer(id) {
-        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-        fetchServers();
-    }
-
-    // Iniciar
-    fetchServers();
-</script>
-
+    </script>
 </body>
 </html>

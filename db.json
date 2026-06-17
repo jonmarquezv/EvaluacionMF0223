@@ -1,4 +1,12 @@
 {
-  "servidores": [],
+  "servidores": [
+    {
+      "nombre": "DBMaster",
+      "cpu": 4,
+      "ram": 8,
+      "almacenamiento": "SSD",
+      "id": "gga-OAO56JI"
+    }
+  ],
   "$schema": "./node_modules/json-server/schema.json"
 }
