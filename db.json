@@ -2,10 +2,10 @@
   "servidores": [
     {
       "nombre": "DBMaster",
-      "cpu": 4,
-      "ram": 8,
+      "cpu": 8,
+      "ram": 6,
       "almacenamiento": "SSD",
-      "id": "gga-OAO56JI"
+      "id": "PAKyo5xrUSE"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
